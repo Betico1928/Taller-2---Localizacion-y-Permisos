@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Taller 2 - Localización y Permisos</string>
+    <string name="MainActivityTitle">Taller 2 - Permisos y Localización</string>
+    <string name="CameraContentDescription">Cámara compacta icon by Icons8 "https://icons8.com/icon/46433/c%C3%A1mara-compacta"</string>
+    <string name="ContactsContentDescription">Directorio icon by Icons8 "https://iconos8.es/icon/RIEURT0p5vAu/directorio"</string>
+    <string name="OSMContentDescription">OSM Icon</string>
+    <string name="GoogleMapsDescription">Google Maps Icon</string>
 </resources>
