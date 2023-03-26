@@ -11,11 +11,11 @@
         android:id="@+id/activityTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/roboto_medium"
         android:text="@string/MainActivityTitle"
         android:textColor="@color/purple_700"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/imageButtonCamera"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,10 +24,11 @@
         android:id="@+id/imageButtonCamera"
         android:layout_width="108dp"
         android:layout_height="97dp"
+        android:layout_marginEnd="12dp"
         android:background="@color/material_dynamic_neutral95"
         android:contentDescription="@string/CameraContentDescription"
-        app:layout_constraintBottom_toTopOf="@+id/imageButtonContacts"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imageButtonContacts"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activityTitle"
         app:srcCompat="@drawable/compactcamera" />
@@ -38,10 +39,10 @@
         android:layout_height="97dp"
         android:background="@color/material_dynamic_neutral95"
         android:contentDescription="@string/ContactsContentDescription"
-        app:layout_constraintBottom_toTopOf="@+id/imageButtonOSM"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageButtonCamera"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imageButtonOSM"
+        app:layout_constraintStart_toEndOf="@+id/imageButtonCamera"
+        app:layout_constraintTop_toBottomOf="@+id/activityTitle"
         app:srcCompat="@drawable/contacts" />
 
     <ImageButton
@@ -53,8 +54,8 @@
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/imageButtonGoogleMaps"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageButtonContacts"
+        app:layout_constraintStart_toEndOf="@+id/imageButtonContacts"
+        app:layout_constraintTop_toBottomOf="@+id/activityTitle"
         app:srcCompat="@drawable/openstreetmapsicon" />
 
     <ImageButton
@@ -67,7 +68,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageButtonOSM"
-        app:layout_constraintTop_toBottomOf="@+id/imageButtonContacts"
+        app:layout_constraintTop_toBottomOf="@+id/activityTitle"
         app:srcCompat="@drawable/googlemapsicon" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
