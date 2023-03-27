@@ -26,6 +26,8 @@ class MainActivity : AppCompatActivity()
         bindingMain.imageButtonCamera.setOnClickListener{
 
             Log.i("Taller 2", "Camera button pressed.")
+
+            //val goToCameraActivity = Intent
         }
 
 
@@ -34,7 +36,8 @@ class MainActivity : AppCompatActivity()
 
             Log.i("Taller 2", "Contacts button pressed.")
 
-            //val goToCameraActivity = Intent
+            val goToContactsActivity = Intent(this, ContactsActivity::class.java)
+            startActivity(goToContactsActivity)
         }
 
 
