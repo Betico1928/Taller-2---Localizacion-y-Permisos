@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,13 +45,20 @@ class ContactsActivity : AppCompatActivity()
         // Si el permiso NO ha sido aceptado:
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED)
         {
+            // Mostrar el porque se necesita el permiso.
+            bindingContacts.statusContacts.text = "The app needs the contacts in order to show them"
+
+            /*
             if (shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS))
             {
-                // Mostrar el porque se necesita el permiso.
                 Toast.makeText(this, "The app needs the contacts in order to show them", Toast.LENGTH_LONG).show()
             }
-            // Perdir el permiso (variable de registerForActivityResult)
-            contactsPermission.launch(android.Manifest.permission.READ_CONTACTS)
+            */
+
+            bindingContacts.contactsPermissionButton.setOnClickListener {
+                // Perdir el permiso (variable de registerForActivityResult)
+                contactsPermission.launch(android.Manifest.permission.READ_CONTACTS)
+            }
         }
 
         // Si el permiso ya ha sido aceptado.
@@ -65,6 +73,9 @@ class ContactsActivity : AppCompatActivity()
 
     private fun initializeElements(contactPermissionStatus: Boolean)
     {
+        // Esconder el boton de OK
+        bindingContacts.contactsPermissionButton.visibility = View.INVISIBLE
+
         if (contactPermissionStatus)
         {
             bindingContacts.statusContacts.text = "Permission Granted"
