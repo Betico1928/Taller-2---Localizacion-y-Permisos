@@ -7,6 +7,13 @@
     android:padding="15dp"
     tools:context=".ContactsActivity">
 
+    <ListView
+        android:id="@+id/contactsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="15dp" />
+
     <LinearLayout
         android:id="@+id/PermissionLinearLayout"
         android:layout_width="match_parent"
@@ -37,12 +44,5 @@
             android:visibility="visible" />
 
     </LinearLayout>
-
-    <ListView
-        android:id="@+id/contactsList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="15dp"
-        tools:layout_editor_absoluteY="15dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
