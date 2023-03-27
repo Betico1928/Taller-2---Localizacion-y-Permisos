@@ -1,9 +1,11 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -15,7 +17,13 @@ import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityContact
 
 class ContactsActivity : AppCompatActivity()
 {
+    // Binding
     private lateinit var bindingContacts : ActivityContactsBinding
+
+    // Lo que se va a mostrar en la lista de contactos
+    private val contactsProjection = arrayOf(ContactsContract.Profile._ID, ContactsContract.Profile.DISPLAY_NAME_PRIMARY)
+    // Cursor
+    private lateinit var contactsCursor : Cursor
 
     // Solicitud de permiso
     private var contactsPermission = registerForActivityResult(
@@ -83,7 +91,10 @@ class ContactsActivity : AppCompatActivity()
 
         if (contactPermissionStatus)
         {
+            // Hide PermissionLinearLayout
             bindingContacts.PermissionLinearLayout.visibility = View.GONE
+
+
         }
         else
         {

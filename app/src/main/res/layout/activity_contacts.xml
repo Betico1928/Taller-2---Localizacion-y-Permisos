@@ -35,6 +35,14 @@
             android:layout_gravity="center"
             android:text="OK"
             android:visibility="visible" />
+
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/contactsList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="15dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
