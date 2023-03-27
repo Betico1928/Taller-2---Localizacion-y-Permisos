@@ -5,4 +5,5 @@
     <string name="ContactsContentDescription">Directorio icon by Icons8 "https://iconos8.es/icon/RIEURT0p5vAu/directorio"</string>
     <string name="OSMContentDescription">OSM Icon</string>
     <string name="GoogleMapsDescription">Google Maps Icon</string>
+    <string name="title_activity_google_maps">GoogleMapsActivity</string>
 </resources>
