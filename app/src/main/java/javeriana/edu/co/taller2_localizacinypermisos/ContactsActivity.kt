@@ -21,20 +21,11 @@ class ContactsActivity : AppCompatActivity()
 
         // Request permission
         ActivityResultContracts.RequestPermission(),
-        ActivityResultCallback{contactPermissionStatus ->
+        ActivityResultCallback{ contactPermissionStatus ->
 
             Log.i("Taller 2", "Contacts Permission: $contactPermissionStatus")
 
-            if (contactPermissionStatus)
-            {
-                bindingContacts.statusContacts.text = "Permission Granted"
-                bindingContacts.statusContacts.setTextColor(Color.GREEN)
-            }
-            else
-            {
-                bindingContacts.statusContacts.text = "Permission Denied"
-                bindingContacts.statusContacts.setTextColor(Color.RED)
-            }
+            initializeElements(contactPermissionStatus)
         }
     )
 
@@ -50,6 +41,39 @@ class ContactsActivity : AppCompatActivity()
 
     private fun getContactsPermission()
     {
-        contactsPermission.launch(android.Manifest.permission.READ_CONTACTS)
+        // Si el permiso NO ha sido aceptado:
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED)
+        {
+            if (shouldShowRequestPermissionRationale(android.Manifest.permission.READ_CONTACTS))
+            {
+                // Mostrar el porque se necesita el permiso.
+                Toast.makeText(this, "The app needs the contacts in order to show them", Toast.LENGTH_LONG).show()
+            }
+            // Perdir el permiso (variable de registerForActivityResult)
+            contactsPermission.launch(android.Manifest.permission.READ_CONTACTS)
+        }
+
+        // Si el permiso ya ha sido aceptado.
+        else
+        {
+            initializeElements(true)
+        }
+
+    }
+
+
+
+    private fun initializeElements(contactPermissionStatus: Boolean)
+    {
+        if (contactPermissionStatus)
+        {
+            bindingContacts.statusContacts.text = "Permission Granted"
+            bindingContacts.statusContacts.setTextColor(Color.GREEN)
+        }
+        else
+        {
+            bindingContacts.statusContacts.text = "Permission Denied"
+            bindingContacts.statusContacts.setTextColor(Color.RED)
+        }
     }
 }
