@@ -37,6 +37,11 @@ class ContactsActivity : AppCompatActivity()
         bindingContacts = ActivityContactsBinding.inflate(layoutInflater)
         setContentView(bindingContacts.root)
 
+        // Mostrar los elementos de la UI
+        bindingContacts.PermissionLinearLayout.visibility = View.VISIBLE
+        bindingContacts.statusContacts.visibility = View.VISIBLE
+        bindingContacts.contactsPermissionButton.visibility = View.VISIBLE
+
         getContactsPermission()
     }
 
@@ -74,12 +79,11 @@ class ContactsActivity : AppCompatActivity()
     private fun initializeElements(contactPermissionStatus: Boolean)
     {
         // Esconder el boton de OK
-        bindingContacts.contactsPermissionButton.visibility = View.INVISIBLE
+        bindingContacts.contactsPermissionButton.visibility = View.GONE
 
         if (contactPermissionStatus)
         {
-            bindingContacts.statusContacts.text = "Permission Granted"
-            bindingContacts.statusContacts.setTextColor(Color.GREEN)
+            bindingContacts.PermissionLinearLayout.visibility = View.GONE
         }
         else
         {
