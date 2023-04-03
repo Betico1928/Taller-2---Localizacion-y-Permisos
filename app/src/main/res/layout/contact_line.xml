@@ -13,7 +13,7 @@
         android:layout_gravity="center"
         android:layout_weight="1"
         tools:layout_weight="0.2"
-        tools:srcCompat="@tools:sample/avatars" />
+        tools:srcCompat="@drawable/baseline_person_4_24" />
 
     <TextView
         android:id="@+id/contactIdText"
