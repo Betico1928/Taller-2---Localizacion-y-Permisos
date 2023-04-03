@@ -13,6 +13,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import javeriana.edu.co.taller2_localizacinypermisos.adapters.ContactsAdapter
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityContactsBinding
 
 class ContactsActivity : AppCompatActivity()
@@ -22,8 +23,13 @@ class ContactsActivity : AppCompatActivity()
 
     // Lo que se va a mostrar en la lista de contactos
     private val contactsProjection = arrayOf(ContactsContract.Profile._ID, ContactsContract.Profile.DISPLAY_NAME_PRIMARY)
+    //private val contactsProjection = arrayOf(ContactsContract.Profile._ID, ContactsContract.Profile.DISPLAY_NAME_PRIMARY, ContactsContract.Profile.PHOTO_FILE_ID)
+
     // Cursor
     private lateinit var contactsCursor : Cursor
+
+    // Adaptador
+    private lateinit var adapter : ContactsAdapter
 
     // Solicitud de permiso
     private var contactsPermission = registerForActivityResult(
@@ -51,6 +57,9 @@ class ContactsActivity : AppCompatActivity()
         bindingContacts.contactsPermissionButton.visibility = View.VISIBLE
 
         getContactsPermission()
+
+        adapter = ContactsAdapter(this, null, 0) // Nulo hasta que haya permiso
+        bindingContacts.contactsList.adapter = adapter
     }
 
     private fun getContactsPermission()
@@ -94,7 +103,11 @@ class ContactsActivity : AppCompatActivity()
             // Hide PermissionLinearLayout
             bindingContacts.PermissionLinearLayout.visibility = View.GONE
 
-
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED)
+            {
+                contactsCursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, contactsProjection, null, null, null)!!
+                adapter.changeCursor(contactsCursor)
+            }
         }
         else
         {
