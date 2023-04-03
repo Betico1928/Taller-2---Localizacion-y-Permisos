@@ -2,10 +2,17 @@ package javeriana.edu.co.taller2_localizacinypermisos
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityCameraBinding
 
-class CameraActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+class CameraActivity : AppCompatActivity()
+{
+    // Binding
+    private lateinit var bindingCamera: ActivityCameraBinding
+
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera)
+        bindingCamera = ActivityCameraBinding.inflate(layoutInflater)
+        setContentView(bindingCamera.root)
     }
 }

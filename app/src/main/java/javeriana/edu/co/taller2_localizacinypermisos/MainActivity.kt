@@ -27,7 +27,8 @@ class MainActivity : AppCompatActivity()
 
             Log.i("Taller 2", "Camera button pressed.")
 
-            //val goToCameraActivity = Intent
+            val goToCameraActivity = Intent(baseContext, CameraActivity::class.java)
+            startActivity(goToCameraActivity)
         }
 
 
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity()
 
             Log.i("Taller 2", "Contacts button pressed.")
 
-            val goToContactsActivity = Intent(this, ContactsActivity::class.java)
+            val goToContactsActivity = Intent(baseContext, ContactsActivity::class.java)
             startActivity(goToContactsActivity)
         }
 
