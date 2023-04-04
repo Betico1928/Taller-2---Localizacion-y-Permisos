@@ -21,6 +21,8 @@ class CameraActivity : AppCompatActivity()
     // Request Camera
     private lateinit var cameraPath : Uri
     private val cameraRequest = registerForActivityResult(ActivityResultContracts.TakePicture(), ActivityResultCallback { loadImage( cameraPath ) })
+
+    
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -32,7 +34,6 @@ class CameraActivity : AppCompatActivity()
 
     private fun initializeElements()
     {
-
         initializeFileFromCamera()
 
 
