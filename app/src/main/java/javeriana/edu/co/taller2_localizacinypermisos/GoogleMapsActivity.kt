@@ -1,7 +1,12 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -15,6 +20,23 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityGoogleMapsBinding
+
+    /*
+    //location permission
+    val locationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+        ActivityResultCallback {
+            if(it) {
+                Log.i("Taller 2", "Hay permiso: " + it.toString())
+                locationSettings()
+            }
+            else{
+                Log.i("Taller 2", "Permiso denegado")
+                binding.elevationA.text = "Permiso denegado"
+            }
+        }
+    )
+    */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
