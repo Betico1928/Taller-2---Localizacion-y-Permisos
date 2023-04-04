@@ -52,11 +52,12 @@ class MainActivity : AppCompatActivity()
 
 
         // Google Maps button:
-        bindingMain.imageButtonOSM.setOnClickListener {
+        bindingMain.imageButtonGoogleMaps.setOnClickListener {
 
             Log.i("Taller 2", "Google Maps button pressed.")
 
-            //val goToGoogleMapsActivity = Intent
+            val goToGoogleMapsActivity = Intent(baseContext, GoogleMapsActivity::class.java)
+            startActivity(goToGoogleMapsActivity)
         }
     }
 }
