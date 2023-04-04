@@ -143,7 +143,16 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
+            // Gestures
+            googleMap.uiSettings.isZoomGesturesEnabled = true
+
+            // Zoom controls
+            googleMap.uiSettings.isZoomControlsEnabled = true
+
+            // Show current location
             googleMap.isMyLocationEnabled = true
+
+
             fusedLocationClient.lastLocation.addOnSuccessListener { location : Location? ->
 
                 if (location != null)
@@ -168,6 +177,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         locationRequest.interval = 5000
         locationRequest.fastestInterval = 3000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
