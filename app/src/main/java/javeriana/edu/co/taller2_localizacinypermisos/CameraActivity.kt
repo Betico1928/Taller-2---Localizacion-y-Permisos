@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityCameraBinding
+import java.io.File
 
 class CameraActivity : AppCompatActivity()
 {
@@ -14,8 +16,11 @@ class CameraActivity : AppCompatActivity()
     private lateinit var bindingCamera: ActivityCameraBinding
 
     // Request Gallery
-    val galleryRequest = registerForActivityResult(ActivityResultContracts.GetContent(), ActivityResultCallback { imagePath : Uri? -> loadImage(imagePath) })
+    private val galleryRequest = registerForActivityResult(ActivityResultContracts.GetContent(), ActivityResultCallback { imagePath : Uri? -> loadImage(imagePath) })
 
+    // Request Camera
+    private lateinit var cameraPath : Uri
+    private val cameraRequest = registerForActivityResult(ActivityResultContracts.TakePicture(), ActivityResultCallback { loadImage( cameraPath ) })
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
@@ -27,13 +32,29 @@ class CameraActivity : AppCompatActivity()
 
     private fun initializeElements()
     {
+
+        initializeFileFromCamera()
+
+
         bindingCamera.galleryButton.setOnClickListener {
             // Open gallery
             galleryRequest.launch("image/*")
         }
+
+        bindingCamera.cameraButton.setOnClickListener {
+            cameraRequest.launch( cameraPath )
+        }
     }
 
-    // Load the image in the activity
+    private fun initializeFileFromCamera()
+    {
+        val fileToLoad = File(filesDir, "fileFromCamera")
+        cameraPath = FileProvider.getUriForFile( this, applicationContext.packageName + ".fileprovider", fileToLoad)
+    }
+
+
+
+    // Load the image in the activity (from gallery or camera)
     private fun loadImage( imagePath : Uri? )
     {
         val imageStream = contentResolver.openInputStream( imagePath!! )
@@ -41,4 +62,5 @@ class CameraActivity : AppCompatActivity()
 
         bindingCamera.cameraImageView.setImageBitmap( image )
     }
+
 }
