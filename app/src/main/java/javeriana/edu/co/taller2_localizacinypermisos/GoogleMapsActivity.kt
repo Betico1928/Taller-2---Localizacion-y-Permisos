@@ -1,57 +1,96 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
-import android.content.IntentSender
+import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationRequest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.Task
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityGoogleMapsBinding
 
     //location
+    private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
+    // Objeto estatico que pertenece a una clase  y que puede ser accedido desde cualquier parte del programa sin necesidad de crear una instancia de la clase.
+    companion object
+    {
+        private const val REQUEST_LOCATION_PERMISSION = 1
+    }
 
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
 
         binding = ActivityGoogleMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        getCurrentLocation()
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+        locationCallback = object : LocationCallback()
+        {
+
+            override fun onLocationResult(locationResult: LocationResult)
+            {
+                val location = locationResult.lastLocation
+                val latLng = location?.let{
+                    LatLng(location.latitude, it.longitude)
+                }
+
+                googleMap.clear()
+
+                latLng?.let {
+                    MarkerOptions().position(it).title("Mi ubicación")
+                }?.let { googleMap.addMarker(it) }
+
+                /*
+                latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 15f) }
+                    ?.let { googleMap.moveCamera(it) }
+
+                 */
+            }
+        }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
     private fun getCurrentLocation()
     {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -77,6 +116,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+     */
 
 
 
@@ -96,25 +136,66 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
 
-        // Gestures
-        mMap.uiSettings.isZoomGesturesEnabled = true
+    override fun onMapReady(map: GoogleMap)
+    {
+        googleMap = map
 
-        // Zoom controls
-        mMap.uiSettings.isZoomControlsEnabled = true
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            googleMap.isMyLocationEnabled = true
+            fusedLocationClient.lastLocation.addOnSuccessListener { location : Location? ->
 
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        /*
-        mMap.animateCamera(
-            CameraUpdateFactory.newLatLngZoom(sydney, 10f),
-            4000,
-            null
-        )
+                if (location != null)
+                    {
+                        val latLng = LatLng(location.latitude, location.longitude)
+                        googleMap.addMarker(MarkerOptions().position(latLng).title("Mi ubicación"))
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+                    }
+                }
 
-         */
+            startLocationUpdates()
+        }
+        else
+        {
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
+        }
+    }
+
+    private fun startLocationUpdates()
+    {
+        val locationRequest = LocationRequest.create()
+        locationRequest.interval = 5000
+        locationRequest.fastestInterval = 3000
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_LOCATION_PERMISSION)
+        {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                onMapReady(googleMap)
+            }
+        }
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        stopLocationUpdates()
+    }
+
+    // Para dejar de recibir actualizaciones
+    private fun stopLocationUpdates()
+    {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 }
