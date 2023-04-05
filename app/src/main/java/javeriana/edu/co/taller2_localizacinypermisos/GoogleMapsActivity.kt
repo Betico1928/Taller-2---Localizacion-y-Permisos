@@ -1,10 +1,10 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
-import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
@@ -59,8 +59,10 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 latLng?.let {
                     MarkerOptions().position(it).title("Mi ubicación")
-                }?.let { googleMap.addMarker(it) }
+                }?.let { googleMap.addMarker(it)
+                locationActions(location)}
 
+                // Real time zoom
                 /*
                 latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 15f) }
                     ?.let { googleMap.moveCamera(it) }
@@ -70,7 +72,10 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-
+    private fun locationActions(location: Location)
+    {
+        Toast.makeText(baseContext, "Latitude: " + location.latitude + "Longuitude: " + location.longitude, Toast.LENGTH_SHORT).show()
+    }
 
 
 
@@ -177,7 +182,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         locationRequest.interval = 5000
         locationRequest.fastestInterval = 3000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
 
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
