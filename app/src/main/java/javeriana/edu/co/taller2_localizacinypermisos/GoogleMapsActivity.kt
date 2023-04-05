@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -15,6 +16,8 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
+import java.lang.Math.toRadians
+import kotlin.math.*
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -35,9 +38,11 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-
         binding = ActivityGoogleMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        var lastLatitude = 0.0
+        var lastLongitude  = 0.0
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -47,7 +52,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         locationCallback = object : LocationCallback()
         {
-
             override fun onLocationResult(locationResult: LocationResult)
             {
                 val location = locationResult.lastLocation
@@ -57,24 +61,52 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 googleMap.clear()
 
+
+
                 latLng?.let {
                     MarkerOptions().position(it).title("Mi ubicación")
                 }?.let { googleMap.addMarker(it)
-                locationActions(location)}
+                    calculateDistance(location, lastLatitude, lastLongitude)
+                    lastLatitude = location.latitude
+                    lastLongitude = location.longitude }
 
                 // Real time zoom
                 /*
                 latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 15f) }
                     ?.let { googleMap.moveCamera(it) }
-
-                 */
+                */
             }
         }
     }
 
-    private fun locationActions(location: Location)
+    private fun calculateDistance(location: Location, lastLatitude: Double, lastLongitude: Double)
     {
-        Toast.makeText(baseContext, "Latitude: " + location.latitude + "Longuitude: " + location.longitude, Toast.LENGTH_SHORT).show()
+        //Toast.makeText(baseContext, "Latitude: " + location.latitude + "Longuitude: " + location.longitude, Toast.LENGTH_SHORT).show()
+
+        Log.i("Taller 2", "Calculate distance between 2 coordenates")
+
+        val currentLatitude = location.latitude
+        val currentLongitude = location.longitude
+        val radius = 30.0 // 30 km de distancia
+        val earthRadiusKm = 6371
+
+        val dLat = toRadians(currentLatitude - lastLatitude)
+        val dLon = toRadians(currentLongitude - lastLongitude)
+
+        val a = sin(dLat / 2).pow(2) + sin(dLon / 2).pow(2) * cos(toRadians(lastLatitude)) * cos(toRadians(currentLatitude))
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+
+        val distanceBetweenTwoCoordenates = earthRadiusKm * c
+
+        if (distanceBetweenTwoCoordenates <= radius)
+        {
+            Toast.makeText(baseContext, "ES MENOR JAJAJA", Toast.LENGTH_SHORT).show()
+        }
+        else
+        {
+            Toast.makeText(baseContext, "ES MAYOR JAJAJA", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
