@@ -2,31 +2,39 @@ package javeriana.edu.co.taller2_localizacinypermisos
 
 import android.content.pm.PackageManager
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.*
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
+import java.io.File
 import java.lang.Math.toRadians
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.*
+
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityGoogleMapsBinding
 
-    //location
+    // Location
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+
+    // Storage permission
+    private var STORAGE_PERMISSION_CODE = 1
 
     // Objeto estatico que pertenece a una clase  y que puede ser accedido desde cualquier parte del programa sin necesidad de crear una instancia de la clase.
     companion object
@@ -45,6 +53,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         var lastLongitude  = 0.0
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        //checkStoragePermission()
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -106,8 +115,88 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         else
         {
             Toast.makeText(baseContext, "ES MAYOR JAJAJA", Toast.LENGTH_SHORT).show()
+            escribirArchivoJson(currentLatitude, currentLongitude)
         }
     }
+
+    fun escribirArchivoJson(latitud: Double, longitud: Double) {
+        val archivo = File("ubicaciones.json")
+        val fechaHora = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        val fechaHoraFormateada = fechaHora.format(formatter)
+        val json = "{\"latitud\":$latitud,\"longitud\":$longitud,\"fechaHora\":\"$fechaHoraFormateada\"}"
+        if (archivo.exists()) {
+            val contenidoActual = archivo.readText()
+            archivo.writeText("$contenidoActual,$json")
+        } else {
+            archivo.writeText("[$json]")
+        }
+    }
+
+    /*
+    private fun checkStoragePermission()
+    {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+        {
+            Toast.makeText(baseContext, "Permiso aceptado", Toast.LENGTH_SHORT).show()
+        }
+        else
+        {
+            requestStoragePermission()
+        }
+    }
+
+    private fun requestStoragePermission()
+    {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE))
+        {
+            AlertDialog.Builder(this)
+                .setTitle("Permission needed")
+                .setMessage("This permission is needed because of this and that")
+                .setPositiveButton(
+                    "ok"
+                ) { dialog, which ->
+                    ActivityCompat.requestPermissions(this, arrayOf<String>(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                        STORAGE_PERMISSION_CODE
+                    )
+                }
+                .setNegativeButton(
+                    "cancel"
+                ) { dialog, which -> dialog.dismiss() }
+                .create().show()
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf<String>(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                STORAGE_PERMISSION_CODE
+            )
+        }
+    }
+    /*private fun requestStoragePermission()
+    {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE))
+        {
+            AlertDialog.Builder(this).setTitle("Permission Needed").setTitle("Se necesita el permiso para escribir en archivo JSON")
+                .setPositiveButton("OK", DialogInterface.OnClickListener(DialogInterface.BUTTON_POSITIVE)
+                {
+
+                })
+                .setNegativeButton("CANCEL", DialogInterface.OnClickListener()
+                {
+                    dialogInterface, i ->  
+                })
+
+        }
+        else
+        {
+            //ActivityCompat.requestPermissions(this, String())
+        }
+    }
+
+     */
+
+     */
+
 
 
 
@@ -230,6 +319,18 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
             {
                 onMapReady(googleMap)
+            }
+        }
+
+        if (requestCode == STORAGE_PERMISSION_CODE)
+        {
+            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(this, "Permission GRANTED", Toast.LENGTH_SHORT).show()
+            }
+            else
+            {
+                Toast.makeText(this, "Permission DENIED", Toast.LENGTH_SHORT).show()
             }
         }
     }
