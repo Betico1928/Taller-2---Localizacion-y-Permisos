@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "settings": {
+    "night_mode": true,
+    "background": "#1e1e1e",
+    "landmarks": "#757575",
+    "labels": "#e0e0e0",
+    "geometry": "#212121",
+    "water": "#0d47a1",
+    "transit": "#424242"
+  }
+}

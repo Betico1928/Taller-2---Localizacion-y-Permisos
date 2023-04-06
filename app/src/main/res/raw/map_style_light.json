@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "settings": {
+    "background": "#f2f2f2",
+    "landmarks": "#bdbdbd",
+    "labels": "#212121",
+    "geometry": "#cfd8dc",
+    "water": "#03a9f4",
+    "transit": "#b0bec5"
+  }
+}

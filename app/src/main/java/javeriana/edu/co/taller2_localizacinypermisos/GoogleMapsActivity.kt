@@ -1,11 +1,16 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
+import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -15,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
 import java.io.File
@@ -24,7 +30,13 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.*
 
 
-class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListener
+{
+    // Objeto estatico que pertenece a una clase  y que puede ser accedido desde cualquier parte del programa sin necesidad de crear una instancia de la clase.
+    companion object
+    {
+        private const val REQUEST_LOCATION_PERMISSION = 1
+    }
 
     private lateinit var binding: ActivityGoogleMapsBinding
 
@@ -33,14 +45,11 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
 
-    // Storage permission
-    private var STORAGE_PERMISSION_CODE = 1
+    // Sensor
+    private lateinit var sensorManager: SensorManager
+    private lateinit var lightSensor: Sensor
 
-    // Objeto estatico que pertenece a una clase  y que puede ser accedido desde cualquier parte del programa sin necesidad de crear una instancia de la clase.
-    companion object
-    {
-        private const val REQUEST_LOCATION_PERMISSION = 1
-    }
+
 
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -59,6 +68,9 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+
         locationCallback = object : LocationCallback()
         {
             override fun onLocationResult(locationResult: LocationResult)
@@ -69,7 +81,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
 
                 googleMap.clear()
-
 
 
                 latLng?.let {
@@ -86,6 +97,19 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 */
             }
         }
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        stopLocationUpdates()
+        sensorManager.unregisterListener(this)
     }
 
     private fun calculateDistance(location: Location, lastLatitude: Double, lastLongitude: Double)
@@ -115,11 +139,12 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
         else
         {
             Toast.makeText(baseContext, "ES MAYOR JAJAJA", Toast.LENGTH_SHORT).show()
-            escribirArchivoJson(currentLatitude, currentLongitude)
+            //escribirArchivoJson(currentLatitude, currentLongitude)
         }
     }
 
-    fun escribirArchivoJson(latitud: Double, longitud: Double) {
+    private fun escribirArchivoJson(latitud: Double, longitud: Double)
+    {
         val archivo = File("ubicaciones.json")
         val fechaHora = LocalDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -266,6 +291,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: GoogleMap)
     {
         googleMap = map
+        setMapStyle(isDarkModeOn())
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
@@ -321,29 +347,39 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 onMapReady(googleMap)
             }
         }
-
-        if (requestCode == STORAGE_PERMISSION_CODE)
-        {
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-                Toast.makeText(this, "Permission GRANTED", Toast.LENGTH_SHORT).show()
-            }
-            else
-            {
-                Toast.makeText(this, "Permission DENIED", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    override fun onPause()
-    {
-        super.onPause()
-        stopLocationUpdates()
     }
 
     // Para dejar de recibir actualizaciones
     private fun stopLocationUpdates()
     {
         fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
+            val lightValue = event.values[0]
+            setMapStyle(lightValue < 2000f)
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    private fun isDarkModeOn(): Boolean {
+        return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+            Configuration.UI_MODE_NIGHT_YES -> true
+            else -> false
+        }
+    }
+
+    private fun setMapStyle(isDarkMode: Boolean) {
+        val styleRes = if (isDarkMode) R.raw.map_style_dark else R.raw.map_style_light
+        try {
+            val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, styleRes))
+            if (!success) {
+                println("Error setting map style.")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
