@@ -2,41 +2,37 @@ package javeriana.edu.co.taller2_localizacinypermisos
 
 import android.content.pm.PackageManager
 import android.location.Location
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.SupportMapFragment
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
-import java.io.File
 import java.lang.Math.toRadians
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.math.*
 
+class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
-{
+    private lateinit var binding: ActivityGoogleMapsBinding
+
+    //location
+    private lateinit var googleMap: GoogleMap
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
     // Objeto estatico que pertenece a una clase  y que puede ser accedido desde cualquier parte del programa sin necesidad de crear una instancia de la clase.
     companion object
     {
         private const val REQUEST_LOCATION_PERMISSION = 1
     }
-
-    private lateinit var binding: ActivityGoogleMapsBinding
-
-    // Location
-    private lateinit var googleMap: GoogleMap
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
 
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -49,7 +45,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         var lastLongitude  = 0.0
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        //checkStoragePermission()
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
@@ -57,7 +52,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
 
         locationCallback = object : LocationCallback()
         {
-
             override fun onLocationResult(locationResult: LocationResult)
             {
                 val location = locationResult.lastLocation
@@ -68,11 +62,13 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
                 googleMap.clear()
 
 
+
                 latLng?.let {
                     MarkerOptions().position(it).title("Mi ubicación")
-                }?.let{
-                    googleMap.addMarker(it)
-                    calculateDistance(location, lastLatitude, lastLongitude) }
+                }?.let { googleMap.addMarker(it)
+                    calculateDistance(location, lastLatitude, lastLongitude)
+                    lastLatitude = location.latitude
+                    lastLongitude = location.longitude }
 
                 // Real time zoom
                 /*
@@ -83,22 +79,11 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         }
     }
 
-    override fun onResume()
-    {
-        super.onResume()
-    }
-
-    override fun onPause()
-    {
-        super.onPause()
-        stopLocationUpdates()
-    }
-
     private fun calculateDistance(location: Location, lastLatitude: Double, lastLongitude: Double)
     {
-        Log.i("Taller 2", "Calculate distance between 2 coordenates")
+        //Toast.makeText(baseContext, "Latitude: " + location.latitude + "Longuitude: " + location.longitude, Toast.LENGTH_SHORT).show()
 
-        Log.i("Taller 2", "Latitude: " + location.latitude + "Longitude: " + location.longitude)
+        Log.i("Taller 2", "Calculate distance between 2 coordenates")
 
         val currentLatitude = location.latitude
         val currentLongitude = location.longitude
@@ -121,24 +106,69 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         else
         {
             Toast.makeText(baseContext, "ES MAYOR JAJAJA", Toast.LENGTH_SHORT).show()
-            //escribirArchivoJson(currentLatitude, currentLongitude)
         }
     }
 
-    private fun escribirArchivoJson(latitud: Double, longitud: Double)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*
+    private fun getCurrentLocation()
     {
-        val archivo = File("ubicaciones.json")
-        val fechaHora = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        val fechaHoraFormateada = fechaHora.format(formatter)
-        val json = "{\"latitud\":$latitud,\"longitud\":$longitud,\"fechaHora\":\"$fechaHoraFormateada\"}"
-        if (archivo.exists()) {
-            val contenidoActual = archivo.readText()
-            archivo.writeText("$contenidoActual,$json")
-        } else {
-            archivo.writeText("[$json]")
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this, arrayOf( android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION), 1)
+        }
+        else
+        {
+            Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
+            /*
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? -> location?.let {
+                val currentLatLng = LatLng(it.latitude, it.longitude)
+                mMap.addMarker(MarkerOptions().position(currentLatLng).title("Tu ubicación"))
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
+            } ?: run {
+                Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
+            }
+            }
+             */
         }
     }
+     */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     override fun onMapReady(map: GoogleMap)
@@ -160,12 +190,12 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
             fusedLocationClient.lastLocation.addOnSuccessListener { location : Location? ->
 
                 if (location != null)
-                    {
-                        val latLng = LatLng(location.latitude, location.longitude)
-                        googleMap.addMarker(MarkerOptions().position(latLng).title("Mi ubicación"))
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-                    }
+                {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    googleMap.addMarker(MarkerOptions().position(latLng).title("Mi ubicación"))
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
                 }
+            }
 
             startLocationUpdates()
         }
@@ -199,6 +229,12 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
                 onMapReady(googleMap)
             }
         }
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        stopLocationUpdates()
     }
 
     // Para dejar de recibir actualizaciones
