@@ -115,12 +115,14 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         {
             Toast.makeText(baseContext, "ES MAYOR JAJAJA", Toast.LENGTH_SHORT).show()
 
-            var writeStatus = permisoEscritura()
-            Log.i("Taller 2", "Write status: $writeStatus")
-
-            if (writeStatus)
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
             {
                 agregarUbicacion(currentLatitude, currentLongitude)
+                Log.i("Taller 2", "Escrito en archivo JSON")
+            }
+            else
+            {
+                Log.i("Taller 2", "No se puede escribir en memoria interna")
             }
         }
     }
