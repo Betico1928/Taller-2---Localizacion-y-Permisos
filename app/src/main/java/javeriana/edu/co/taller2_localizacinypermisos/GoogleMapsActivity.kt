@@ -92,8 +92,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         mMap.addMarker(markerOptions)
     }
 
-    override fun onMarkerClick(p0: Marker): Boolean {return false}
-
+    override fun onMarkerClick(p0: Marker) = false
 }
 
 
