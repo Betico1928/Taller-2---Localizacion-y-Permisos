@@ -30,7 +30,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.*
 
 
-class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventListener
+class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
 {
     // Objeto estatico que pertenece a una clase  y que puede ser accedido desde cualquier parte del programa sin necesidad de crear una instancia de la clase.
     companion object
@@ -44,12 +44,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventL
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
-
-    // Sensor
-    private lateinit var sensorManager: SensorManager
-    private lateinit var lightSensor: Sensor
-
-
 
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -68,9 +62,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventL
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-
         locationCallback = object : LocationCallback()
         {
             override fun onLocationResult(locationResult: LocationResult)
@@ -85,10 +76,9 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventL
 
                 latLng?.let {
                     MarkerOptions().position(it).title("Mi ubicación")
-                }?.let { googleMap.addMarker(it)
-                    calculateDistance(location, lastLatitude, lastLongitude)
-                    lastLatitude = location.latitude
-                    lastLongitude = location.longitude }
+                }?.let{
+                    googleMap.addMarker(it)
+                    calculateDistance(location, lastLatitude, lastLongitude) }
 
                 // Real time zoom
                 /*
@@ -102,21 +92,19 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventL
     override fun onResume()
     {
         super.onResume()
-        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun onPause()
     {
         super.onPause()
         stopLocationUpdates()
-        sensorManager.unregisterListener(this)
     }
 
     private fun calculateDistance(location: Location, lastLatitude: Double, lastLongitude: Double)
     {
-        //Toast.makeText(baseContext, "Latitude: " + location.latitude + "Longuitude: " + location.longitude, Toast.LENGTH_SHORT).show()
-
         Log.i("Taller 2", "Calculate distance between 2 coordenates")
+
+        Log.i("Taller 2", "Latitude: " + location.latitude + "Longitude: " + location.longitude)
 
         val currentLatitude = location.latitude
         val currentLongitude = location.longitude
@@ -158,140 +146,10 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventL
         }
     }
 
-    /*
-    private fun checkStoragePermission()
-    {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-        {
-            Toast.makeText(baseContext, "Permiso aceptado", Toast.LENGTH_SHORT).show()
-        }
-        else
-        {
-            requestStoragePermission()
-        }
-    }
-
-    private fun requestStoragePermission()
-    {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE))
-        {
-            AlertDialog.Builder(this)
-                .setTitle("Permission needed")
-                .setMessage("This permission is needed because of this and that")
-                .setPositiveButton(
-                    "ok"
-                ) { dialog, which ->
-                    ActivityCompat.requestPermissions(this, arrayOf<String>(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                        STORAGE_PERMISSION_CODE
-                    )
-                }
-                .setNegativeButton(
-                    "cancel"
-                ) { dialog, which -> dialog.dismiss() }
-                .create().show()
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf<String>(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                STORAGE_PERMISSION_CODE
-            )
-        }
-    }
-    /*private fun requestStoragePermission()
-    {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.READ_EXTERNAL_STORAGE))
-        {
-            AlertDialog.Builder(this).setTitle("Permission Needed").setTitle("Se necesita el permiso para escribir en archivo JSON")
-                .setPositiveButton("OK", DialogInterface.OnClickListener(DialogInterface.BUTTON_POSITIVE)
-                {
-
-                })
-                .setNegativeButton("CANCEL", DialogInterface.OnClickListener()
-                {
-                    dialogInterface, i ->  
-                })
-
-        }
-        else
-        {
-            //ActivityCompat.requestPermissions(this, String())
-        }
-    }
-
-     */
-
-     */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-    private fun getCurrentLocation()
-    {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(this, arrayOf( android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION), 1)
-        }
-        else
-        {
-            Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
-            /*
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? -> location?.let {
-
-                val currentLatLng = LatLng(it.latitude, it.longitude)
-                mMap.addMarker(MarkerOptions().position(currentLatLng).title("Tu ubicación"))
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-            } ?: run {
-                Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
-            }
-            }
-
-             */
-        }
-    }
-
-     */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     override fun onMapReady(map: GoogleMap)
     {
         googleMap = map
-        setMapStyle(isDarkModeOn())
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
@@ -353,33 +211,5 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, SensorEventL
     private fun stopLocationUpdates()
     {
         fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
-            val lightValue = event.values[0]
-            setMapStyle(lightValue < 2000f)
-        }
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-
-    private fun isDarkModeOn(): Boolean {
-        return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> true
-            else -> false
-        }
-    }
-
-    private fun setMapStyle(isDarkMode: Boolean) {
-        val styleRes = if (isDarkMode) R.raw.map_style_dark else R.raw.map_style_light
-        try {
-            val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, styleRes))
-            if (!success) {
-                println("Error setting map style.")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 }
