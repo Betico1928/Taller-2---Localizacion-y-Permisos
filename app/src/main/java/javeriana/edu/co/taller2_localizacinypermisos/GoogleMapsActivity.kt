@@ -3,9 +3,14 @@ package javeriana.edu.co.taller2_localizacinypermisos
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -16,6 +21,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
 import java.time.LocalDateTime
+import java.util.concurrent.ArrayBlockingQueue
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
 {
@@ -32,6 +38,12 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient : FusedLocationProviderClient
 
+    // Permission Launcher
+    private lateinit var permissionLauncher : ActivityResultLauncher<Array<String>>
+    private var isReadPermissionGranted = false
+    private var isWritePermissionGranted = false
+    private var isLocationPermissionGranted = false
+
     companion object
     {
         private const val LOCATION_REQUEST_CODE = 1
@@ -43,12 +55,60 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         bindingGoogleMaps = ActivityGoogleMapsBinding.inflate(layoutInflater)
         setContentView(bindingGoogleMaps.root)
 
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
+
+            isReadPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: isReadPermissionGranted
+            isWritePermissionGranted = permissions[android.Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: isWritePermissionGranted
+            isLocationPermissionGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] ?: isLocationPermissionGranted
+
+            Log.i("Taller 2", "Read initial permission: $isReadPermissionGranted")
+            Log.i("Taller 2", "Write initial permission: $isWritePermissionGranted")
+            Log.i("Taller 2", "Location initial permission: $isLocationPermissionGranted")
+        }
+
+        requestPermissions()
+
+        Log.i("Taller 2", "Read permission: $isReadPermissionGranted")
+        Log.i("Taller 2", "Write permission: $isWritePermissionGranted")
+        Log.i("Taller 2", "Location permission: $isLocationPermissionGranted")
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    private fun requestPermissions()
+    {
+        isReadPermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        isWritePermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        isLocationPermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        val permissionRequest : MutableList<String> = ArrayList()
+
+
+        if (!isReadPermissionGranted)
+        {
+            permissionRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+
+        if (!isWritePermissionGranted)
+        {
+            permissionRequest.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        if (!isLocationPermissionGranted)
+        {
+            permissionRequest.add(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+
+        if (permissionRequest.isNotEmpty())
+        {
+            permissionLauncher.launch(permissionRequest.toTypedArray())
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap)
