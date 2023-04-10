@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.*
@@ -15,6 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.Marker
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
@@ -23,69 +26,123 @@ import java.lang.Math.toRadians
 import java.time.LocalDateTime
 import kotlin.math.*
 
-class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
+class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
 {
     // Para escribir en la ubicacion
     data class Ubicacion(val latitud: Double, val longitud: Double, val fechaHora: LocalDateTime)
 
     // Binding
-    private lateinit var binding: ActivityGoogleMapsBinding
+    private lateinit var bindingGoogleMaps : ActivityGoogleMapsBinding
+
+    // mMap
+    private lateinit var mMap: GoogleMap
 
     // Location
-    private lateinit var googleMap: GoogleMap
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
+    private lateinit var lastLocation: Location
+    private lateinit var fusedLocationClient : FusedLocationProviderClient
 
-    // Objeto estatico que pertenece a una clase  y que puede ser accedido desde cualquier parte del programa sin necesidad de crear una instancia de la clase.
     companion object
     {
-        private const val REQUEST_LOCATION_PERMISSION = 1
+        private const val LOCATION_REQUEST_CODE = 1
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-        binding = ActivityGoogleMapsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        var lastLatitude = 0.0
-        var lastLongitude  = 0.0
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        bindingGoogleMaps = ActivityGoogleMapsBinding.inflate(layoutInflater)
+        setContentView(bindingGoogleMaps.root)
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        locationCallback = object : LocationCallback()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap)
+    {
+        mMap = googleMap
+
+        // Zoom
+        mMap.uiSettings.isZoomGesturesEnabled = true
+
+        // Arrancar mapa
+        mMap.setOnMarkerClickListener(this)
+        setUpMap()
+    }
+
+    private fun setUpMap()
+    {
+        // Verificar permisos
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
-            override fun onLocationResult(locationResult: LocationResult)
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE)
+            return
+        }
+
+        mMap.isMyLocationEnabled = true
+
+        fusedLocationClient.lastLocation.addOnSuccessListener(this){ location ->
+            if (location != null)
             {
-                val location = locationResult.lastLocation
-                val latLng = location?.let{
-                    LatLng(location.latitude, it.longitude)
-                }
-
-                googleMap.clear()
-
-
-
-                latLng?.let {
-                    MarkerOptions().position(it).title("Mi ubicación")
-                }?.let { googleMap.addMarker(it)
-                    calculateDistance(location, lastLatitude, lastLongitude)
-                    lastLatitude = location.latitude
-                    lastLongitude = location.longitude }
-
-                // Real time zoom
-                /*
-                latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 15f) }
-                    ?.let { googleMap.moveCamera(it) }
-                */
+                lastLocation = location
+                val currentLatLong = LatLng(location.latitude, location.longitude)
+                placeMarkerOnMap(currentLatLong)
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 12f))
             }
         }
     }
+
+    private fun placeMarkerOnMap(currentLatLong: LatLng)
+    {
+        val markerOptions = MarkerOptions().position(currentLatLong)
+        markerOptions.title("Ubicacion actual: $currentLatLong")
+        mMap.addMarker(markerOptions)
+    }
+
+    override fun onMarkerClick(p0: Marker): Boolean {return false}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 
     private fun calculateDistance(location: Location, lastLatitude: Double, lastLongitude: Double)
     {
@@ -127,7 +184,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         }
     }
 
-
     fun agregarUbicacion(latitud: Double, longitud: Double)
     {
         // Crear objeto Gson para serializar/deserializar objetos JSON
@@ -155,142 +211,4 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         archivo.writeText(json)
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-    private fun getCurrentLocation()
-    {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(this, arrayOf( android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION), 1)
-        }
-        else
-        {
-            Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
-            /*
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? -> location?.let {
-                val currentLatLng = LatLng(it.latitude, it.longitude)
-                mMap.addMarker(MarkerOptions().position(currentLatLng).title("Tu ubicación"))
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15f))
-            } ?: run {
-                Toast.makeText(this, "No se pudo obtener la ubicación", Toast.LENGTH_SHORT).show()
-            }
-            }
-             */
-        }
-    }
-     */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    override fun onMapReady(map: GoogleMap)
-    {
-        googleMap = map
-
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-        {
-            // Gestures
-            googleMap.uiSettings.isZoomGesturesEnabled = true
-
-            // Zoom controls
-            googleMap.uiSettings.isZoomControlsEnabled = true
-
-            // Show current location
-            googleMap.isMyLocationEnabled = true
-
-
-            fusedLocationClient.lastLocation.addOnSuccessListener { location : Location? ->
-
-                if (location != null)
-                {
-                    val latLng = LatLng(location.latitude, location.longitude)
-                    googleMap.addMarker(MarkerOptions().position(latLng).title("Mi ubicación"))
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-                }
-            }
-
-            startLocationUpdates()
-        }
-        else
-        {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
-        }
-    }
-
-    private fun startLocationUpdates()
-    {
-        val locationRequest = LocationRequest.create()
-        locationRequest.interval = 5000
-        locationRequest.fastestInterval = 3000
-        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-        {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray)
-    {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_LOCATION_PERMISSION)
-        {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-                onMapReady(googleMap)
-            }
-        }
-    }
-
-
-    private fun permisoEscritura() : Boolean
-    {
-        return ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-    }
-
-    override fun onPause()
-    {
-        super.onPause()
-        stopLocationUpdates()
-    }
-
-    // Para dejar de recibir actualizaciones
-    private fun stopLocationUpdates()
-    {
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-}
+ */
