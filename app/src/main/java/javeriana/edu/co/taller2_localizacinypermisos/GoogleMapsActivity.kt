@@ -1,12 +1,6 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
-import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.Configuration
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -20,7 +14,6 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
 import java.io.File
@@ -64,6 +57,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
 
         locationCallback = object : LocationCallback()
         {
+
             override fun onLocationResult(locationResult: LocationResult)
             {
                 val location = locationResult.lastLocation
