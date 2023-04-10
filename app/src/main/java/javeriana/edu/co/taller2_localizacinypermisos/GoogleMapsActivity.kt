@@ -25,12 +25,13 @@ import kotlin.math.*
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
 {
-
+    // Para escribir en la ubicacion
     data class Ubicacion(val latitud: Double, val longitud: Double, val fechaHora: LocalDateTime)
 
+    // Binding
     private lateinit var binding: ActivityGoogleMapsBinding
 
-    //location
+    // Location
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -94,7 +95,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
 
         val currentLatitude = location.latitude
         val currentLongitude = location.longitude
-        val radius = 30.0 // 30 km de distancia
+        val radius = 0.03 // 30 metros de distancia
         val earthRadiusKm = 6371
 
         val dLat = toRadians(currentLatitude - lastLatitude)
@@ -113,38 +114,18 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         else
         {
             Toast.makeText(baseContext, "ES MAYOR JAJAJA", Toast.LENGTH_SHORT).show()
-            //agregarUbicacion(currentLatitude, currentLongitude)
-            // Crear objeto Gson para serializar/deserializar objetos JSON
-            val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
-            // Crear archivo si no existe
-            val archivo = File("ubicaciones.json")
-            if (!archivo.exists())
+            var writeStatus = permisoEscritura()
+            Log.i("Taller 2", "Write status: $writeStatus")
+
+            if (writeStatus)
             {
-                archivo.createNewFile()
+                agregarUbicacion(currentLatitude, currentLongitude)
             }
-
-            // Leer contenido del archivo y convertir a lista de Ubicacion (si el archivo no está vacío)
-            val ubicacionesAnteriores = if (archivo.length() > 0)
-            {
-                gson.fromJson(archivo.readText(), Array<Ubicacion>::class.java).toList()
-            }
-            else
-            {
-                emptyList()
-            }
-
-            // Crear nueva instancia de Ubicacion y agregar a la lista anterior
-            val nuevaUbicacion = Ubicacion(currentLatitude, currentLongitude, LocalDateTime.now())
-            val ubicacionesNuevas = ubicacionesAnteriores + nuevaUbicacion
-
-            // Serializar lista de ubicaciones y escribir en el archivo
-            val json = gson.toJson(ubicacionesNuevas)
-            archivo.writeText(json)
         }
     }
 
-    /*
+
     fun agregarUbicacion(latitud: Double, longitud: Double)
     {
         // Crear objeto Gson para serializar/deserializar objetos JSON
@@ -171,8 +152,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
         val json = gson.toJson(ubicacionesNuevas)
         archivo.writeText(json)
     }
-
-     */
 
 
 
@@ -293,6 +272,12 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback
                 onMapReady(googleMap)
             }
         }
+    }
+
+
+    private fun permisoEscritura() : Boolean
+    {
+        return ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onPause()
