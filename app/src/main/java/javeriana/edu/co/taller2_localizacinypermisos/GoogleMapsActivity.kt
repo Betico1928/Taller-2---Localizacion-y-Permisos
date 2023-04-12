@@ -88,7 +88,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
 
-
         locationCallback = object : LocationCallback()
         {
             override fun onLocationResult(locationResult: LocationResult)
@@ -98,14 +97,13 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
                     LatLng(location.latitude, it.longitude)
                 }
 
-                mMap.clear()
-
+                //mMap.clear()
 
                 latLng?.let {
                     MarkerOptions().position(it).title("Mi ubicación")
                 }?.let{
                     mMap.addMarker(it)
-                    calculateDistance(location, lastLatitude, lastLongitude)}
+                    calculateDistance(location, lastLatitude, lastLongitude) }
 
                 // Real time zoom
                 /*
@@ -115,6 +113,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             }
         }
     }
+
 
     private fun requestPermissions()
     {
@@ -159,6 +158,14 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
         // Arrancar mapa
         mMap.setOnMarkerClickListener(this)
+
+        mMap.setOnMapLongClickListener { latLng -> // Add a marker on the long pressed location
+            mMap.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .title("Long Pressed Location")
+            )
+        }
 
 
         try {
