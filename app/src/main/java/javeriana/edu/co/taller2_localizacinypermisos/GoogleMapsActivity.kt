@@ -4,6 +4,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -17,8 +18,13 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
+import java.io.File
+import java.lang.Math.toRadians
 import java.time.LocalDateTime
+import kotlin.math.*
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
 {
@@ -35,6 +41,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient : FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    var lastLatitude = 0.0
+    var lastLongitude  = 0.0
 
     // Permission Launcher
     private lateinit var permissionLauncher : ActivityResultLauncher<Array<String>>
@@ -94,7 +102,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
                 latLng?.let {
                     MarkerOptions().position(it).title("Mi ubicación")
                 }?.let{
-                    mMap.addMarker(it) }
+                    mMap.addMarker(it)
+                    calculateDistance(location, lastLatitude, lastLongitude)}
 
                 // Real time zoom
                 /*
@@ -225,56 +234,14 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     }
 
 
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
     private fun calculateDistance(location: Location, lastLatitude: Double, lastLongitude: Double)
     {
         //Toast.makeText(baseContext, "Latitude: " + location.latitude + "Longuitude: " + location.longitude, Toast.LENGTH_SHORT).show()
 
         Log.i("Taller 2", "Calculate distance between 2 coordenates")
 
-        val currentLatitude = location.latitude
-        val currentLongitude = location.longitude
+        var currentLatitude = location.latitude
+        var currentLongitude = location.longitude
         val radius = 0.03 // 30 metros de distancia
         val earthRadiusKm = 6371
 
@@ -305,6 +272,9 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
                 Log.i("Taller 2", "No se puede escribir en memoria interna")
             }
         }
+
+        this@GoogleMapsActivity.lastLatitude = currentLatitude
+        this@GoogleMapsActivity.lastLongitude = currentLongitude
     }
 
     fun agregarUbicacion(latitud: Double, longitud: Double)
@@ -333,5 +303,4 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         val json = gson.toJson(ubicacionesNuevas)
         archivo.writeText(json)
     }
-
- */
+}
