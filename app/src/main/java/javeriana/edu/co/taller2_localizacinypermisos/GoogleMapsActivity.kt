@@ -1,6 +1,7 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +17,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
@@ -157,6 +159,24 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
         // Arrancar mapa
         mMap.setOnMarkerClickListener(this)
+
+
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    this, R.raw.map_style_retro
+                )
+            )
+
+            if (!success) {
+                Log.e("Taller 2", "Style parsing failed.")
+            }
+        } catch (e: Resources.NotFoundException) {
+            Log.e("Taller 2", "Can't find style. Error: ", e)
+        }
+
         setUpMap()
     }
 
