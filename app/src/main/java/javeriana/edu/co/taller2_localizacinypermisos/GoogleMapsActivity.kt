@@ -9,9 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -21,7 +19,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
 import java.time.LocalDateTime
-import java.util.concurrent.ArrayBlockingQueue
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
 {
@@ -37,6 +34,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     // Location
     private lateinit var lastLocation: Location
     private lateinit var fusedLocationClient : FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
 
     // Permission Launcher
     private lateinit var permissionLauncher : ActivityResultLauncher<Array<String>>
@@ -78,6 +76,33 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+
+
+        locationCallback = object : LocationCallback()
+        {
+            override fun onLocationResult(locationResult: LocationResult)
+            {
+                val location = locationResult.lastLocation
+                val latLng = location?.let{
+                    LatLng(location.latitude, it.longitude)
+                }
+
+                mMap.clear()
+
+
+                latLng?.let {
+                    MarkerOptions().position(it).title("Mi ubicación")
+                }?.let{
+                    mMap.addMarker(it) }
+
+                // Real time zoom
+                /*
+                latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 15f) }
+                    ?.let { googleMap.moveCamera(it) }
+                */
+            }
+        }
     }
 
     private fun requestPermissions()
@@ -118,6 +143,9 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         // Zoom
         mMap.uiSettings.isZoomGesturesEnabled = true
 
+        // Controles de zoom
+        mMap.uiSettings.isZoomControlsEnabled = true
+
         // Arrancar mapa
         mMap.setOnMarkerClickListener(this)
         setUpMap()
@@ -132,6 +160,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             return
         }
 
+        // Mostrar el puntico azul de localizacion actual
         mMap.isMyLocationEnabled = true
 
         fusedLocationClient.lastLocation.addOnSuccessListener(this){ location ->
@@ -139,20 +168,64 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             {
                 lastLocation = location
                 val currentLatLong = LatLng(location.latitude, location.longitude)
+
+                //Coloca un marcador en la ubicacion actual.
                 placeMarkerOnMap(currentLatLong)
+
+                // Ajusta la camara a la ubicacion actual
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 12f))
             }
+
+            startLocationUpdates()
         }
     }
 
+    private fun startLocationUpdates()
+    {
+        val locationRequest = LocationRequest.create()
+        locationRequest.interval = 5000
+        locationRequest.fastestInterval = 3000
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        }
+    }
+
+
+    // Pone un marcador en la ubicacion actual
     private fun placeMarkerOnMap(currentLatLong: LatLng)
     {
         val markerOptions = MarkerOptions().position(currentLatLong)
-        markerOptions.title("Ubicacion actual: $currentLatLong")
+        markerOptions.title("Ubicacion actual")
+        Log.i("Taller 2", "Marker añadido")
         mMap.addMarker(markerOptions)
     }
 
     override fun onMarkerClick(p0: Marker) = false
+
+
+    // Para dejar de recibir actualizaciones
+    private fun stopLocationUpdates()
+    {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+
+    override fun onResume()
+    {
+        super.onResume()
+    }
+
+    override fun onPause()
+    {
+        super.onPause()
+        stopLocationUpdates()
+    }
+
+
+
 }
 
 
