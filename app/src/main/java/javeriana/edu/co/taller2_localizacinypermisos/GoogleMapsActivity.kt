@@ -2,6 +2,9 @@ package javeriana.edu.co.taller2_localizacinypermisos
 
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -28,7 +31,7 @@ import java.lang.Math.toRadians
 import java.time.LocalDateTime
 import kotlin.math.*
 
-class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener
+class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener, SensorEventListener
 {
     // Para escribir en la ubicacion
     data class Ubicacion(val latitud: Double, val longitud: Double, val fechaHora: LocalDateTime)
@@ -329,5 +332,15 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         // Serializar lista de ubicaciones y escribir en el archivo
         val json = gson.toJson(ubicacionesNuevas)
         archivo.writeText(json)
+    }
+
+    override fun onSensorChanged(event: SensorEvent?)
+    {
+        TODO("Not yet implemented")
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int)
+    {
+        TODO("Not yet implemented")
     }
 }
