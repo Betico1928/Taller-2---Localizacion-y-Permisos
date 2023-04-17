@@ -342,7 +342,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
         if (event != null)
         {
-            if (event.values[0] < 2000)
+            if (event.values[0] < 10000)
             {
                 try
                 {
