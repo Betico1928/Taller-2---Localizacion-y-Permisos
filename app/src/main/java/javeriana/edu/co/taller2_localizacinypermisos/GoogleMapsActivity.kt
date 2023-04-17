@@ -1,10 +1,12 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
+import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -33,6 +35,10 @@ import kotlin.math.*
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener, SensorEventListener
 {
+    // Sensors
+    var sensorManager : SensorManager? = null
+    var sensor : Sensor? = null
+
     // Para escribir en la ubicacion
     data class Ubicacion(val latitud: Double, val longitud: Double, val fechaHora: LocalDateTime)
 
@@ -65,6 +71,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         super.onCreate(savedInstanceState)
         bindingGoogleMaps = ActivityGoogleMapsBinding.inflate(layoutInflater)
         setContentView(bindingGoogleMaps.root)
+
+        verifySensor()
 
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
 
@@ -170,23 +178,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             )
         }
 
-
-        try {
-            // Customise the styling of the base map using a JSON object defined
-            // in a raw resource file.
-            val success = googleMap.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    this, R.raw.map_style_retro
-                )
-            )
-
-            if (!success) {
-                Log.e("Taller 2", "Style parsing failed.")
-            }
-        } catch (e: Resources.NotFoundException) {
-            Log.e("Taller 2", "Can't find style. Error: ", e)
-        }
-
         setUpMap()
     }
 
@@ -255,12 +246,14 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     override fun onResume()
     {
         super.onResume()
+        sensorManager?.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     override fun onPause()
     {
         super.onPause()
         stopLocationUpdates()
+        sensorManager?.unregisterListener(this)
     }
 
 
@@ -286,11 +279,11 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
         if (distanceBetweenTwoCoordenates <= radius)
         {
-            Toast.makeText(baseContext, "ES MENOR JAJAJA", Toast.LENGTH_SHORT).show()
+            Log.i("Taller 2", "Distancia menor")
         }
         else
         {
-            Toast.makeText(baseContext, "ES MAYOR JAJAJA", Toast.LENGTH_SHORT).show()
+            Log.i("Taller 2", "Distancia mayor")
 
             if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
             {
@@ -334,13 +327,62 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         archivo.writeText(json)
     }
 
+    private fun verifySensor()
+    {
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_LIGHT)
+
+        Log.i("Taller 2", sensor.toString())
+        Log.i("Taller 2", sensorManager.toString())
+    }
+
     override fun onSensorChanged(event: SensorEvent?)
     {
-        TODO("Not yet implemented")
+        var googleMap = mMap
+
+        if (event != null)
+        {
+            if (event.values[0] < 2000)
+            {
+                try
+                {
+                    // Customise the styling of the base map using a JSON object defined
+                    // in a raw resource file.
+                    val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
+
+                    if (!success)
+                    {
+                        Log.e("Taller 2", "Style parsing failed.")
+                    }
+                }
+                catch (e: Resources.NotFoundException)
+                {
+                    Log.e("Taller 2", "Can't find style. Error: ", e)
+                }
+            }
+            else
+            {
+                try
+                {
+                    // Customise the styling of the base map using a JSON object defined
+                    // in a raw resource file.
+                    val success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_retro))
+
+                    if (!success)
+                    {
+                        Log.e("Taller 2", "Style parsing failed.")
+                    }
+                }
+                catch (e: Resources.NotFoundException)
+                {
+                    Log.e("Taller 2", "Can't find style. Error: ", e)
+                }
+            }
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int)
     {
-        TODO("Not yet implemented")
+        return
     }
 }
