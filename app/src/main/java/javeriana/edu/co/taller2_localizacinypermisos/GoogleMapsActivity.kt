@@ -7,6 +7,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -54,6 +55,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     private lateinit var locationCallback: LocationCallback
     var lastLatitude = 0.0
     var lastLongitude  = 0.0
+    private lateinit var geocoder: Geocoder
 
     // Permission Launcher
     private lateinit var permissionLauncher : ActivityResultLauncher<Array<String>>
@@ -92,8 +94,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         Log.i("Taller 2", "Location permission: $isLocationPermissionGranted")
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -170,13 +172,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         // Arrancar mapa
         mMap.setOnMarkerClickListener(this)
 
-        mMap.setOnMapLongClickListener { latLng -> // Add a marker on the long pressed location
-            mMap.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .title("Long Pressed Location")
-            )
-        }
 
         setUpMap()
     }
