@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:padding="15dp">
-    
-    <EditText
-        android:id="@+id/mapText"
-        android:layout_height="wrap_content"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:hint="Introduzca una dirección">
-    </EditText>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/mapText"
+            android:layout_width="284dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:hint="Introduzca una dirección"></EditText>
+
+        <Button
+            android:id="@+id/buscarDireccion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Buscar"
+            tools:layout_weight="0.5" />
+    </LinearLayout>
 
     <fragment
         xmlns:tools="http://schemas.android.com/tools"
