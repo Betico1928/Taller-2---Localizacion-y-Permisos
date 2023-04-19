@@ -243,8 +243,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         locationRequest.interval = 5000
         locationRequest.fastestInterval = 3000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-
-
+        
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
@@ -311,16 +310,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         else
         {
             Log.i("Taller 2", "Distancia mayor")
-
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-            {
-                agregarUbicacion(currentLatitude, currentLongitude)
-                Log.i("Taller 2", "Escrito en archivo JSON")
-            }
-            else
-            {
-                Log.i("Taller 2", "No se puede escribir en memoria interna")
-            }
+            agregarUbicacion(currentLatitude, currentLongitude)
         }
 
         this@GoogleMapsActivity.lastLatitude = currentLatitude
@@ -333,15 +323,19 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 
         // Crear archivo si no existe
-        val archivo = File("ubicaciones.json")
-        if (!archivo.exists()) {
+        val nombreArchivo = "locations.json"
+        val archivo = File(getExternalFilesDir(null), nombreArchivo)
+        if (!archivo.exists())
+        {
             archivo.createNewFile()
         }
 
         // Leer contenido del archivo y convertir a lista de Ubicacion (si el archivo no está vacío)
-        val ubicacionesAnteriores = if (archivo.length() > 0) {
+        val ubicacionesAnteriores = if (archivo.length() > 0)
+        {
             gson.fromJson(archivo.readText(), Array<Ubicacion>::class.java).toList()
-        } else {
+        }
+        else {
             emptyList()
         }
 
@@ -352,6 +346,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         // Serializar lista de ubicaciones y escribir en el archivo
         val json = gson.toJson(ubicacionesNuevas)
         archivo.writeText(json)
+        Log.i("Taller 2", "Escrito en archivo JSON")
     }
 
     private fun verifySensor()
