@@ -112,11 +112,13 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
                     if (direccionesGeocoder!!.size > 0)
                     {
                         val address = direccionesGeocoder[0]
+                        val nombreAddress = address.getAddressLine(0)
                         val markerLatitude = address.latitude
                         val markerLongitude = address.longitude
 
                         val puntoAColocar = LatLng(markerLatitude, markerLongitude)
-                        mMap.addMarker(MarkerOptions().position(puntoAColocar).title(direccionABuscar.toString()))
+                        mMap.addMarker(MarkerOptions().position(puntoAColocar).title(direccionABuscar.toString()).snippet(nombreAddress))
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(puntoAColocar, 14f))
                     }
                     else
                     {
