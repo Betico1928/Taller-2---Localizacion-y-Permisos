@@ -31,6 +31,7 @@ import com.google.gson.GsonBuilder
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
 import java.io.File
 import java.lang.Math.toRadians
+import java.text.DecimalFormat
 import java.util.Date
 import kotlin.math.*
 
@@ -48,6 +49,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
     // mMap
     private lateinit var mMap: GoogleMap
+    var lastMarkerLatitude : Double = 0.0
+    var lastMarkerLongitude : Double = 0.0
 
     // Location
     private lateinit var lastLocation: Location
@@ -62,6 +65,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     private var isReadPermissionGranted = false
     private var isWritePermissionGranted = false
     private var isLocationPermissionGranted = false
+
+    val earthRadiusKm = 6371
 
     companion object
     {
@@ -115,6 +120,9 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
                         val nombreAddress = address.getAddressLine(0)
                         val markerLatitude = address.latitude
                         val markerLongitude = address.longitude
+
+                        lastMarkerLatitude = address.latitude
+                        lastMarkerLongitude = address.longitude
 
                         val puntoAColocar = LatLng(markerLatitude, markerLongitude)
                         mMap.addMarker(MarkerOptions().position(puntoAColocar).title(direccionABuscar.toString()).snippet(nombreAddress))
@@ -234,11 +242,38 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             }
 
 
-            mMap.setOnMapLongClickListener {
-                mMap.addMarker(MarkerOptions().position(it).title("Marcador LongClick"))
+            mMap.setOnMapLongClickListener { longClickLatLng ->
+                mMap.addMarker(MarkerOptions().position(longClickLatLng).title("Marcador LongClick"))
+
+                calculateDistanceBetweenMarkers(longClickLatLng)
             }
 
             startLocationUpdates()
+        }
+    }
+
+    private fun calculateDistanceBetweenMarkers(longClickLatLng: LatLng)
+    {
+        if (lastMarkerLatitude == 0.0 && lastMarkerLongitude == 0.0)
+        {
+            Toast.makeText(baseContext, "Aún no se ha escrito un marcador", Toast.LENGTH_LONG).show()
+        }
+        else
+        {
+            val longClickLatitude = longClickLatLng.latitude
+            val longClickLongitude = longClickLatLng.longitude
+
+            val dLat = Math.toRadians(lastMarkerLatitude - longClickLatitude)
+            val dLon = Math.toRadians(lastLongitude - longClickLongitude)
+
+            val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(longClickLatitude)) * Math.cos(Math.toRadians(lastMarkerLatitude)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+
+            val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+
+            val totalDistance = earthRadiusKm * c
+            val conversionDecimal = DecimalFormat("#.##")
+
+            Toast.makeText(baseContext,"La distancia total entre marcadores es de: " + conversionDecimal.format(totalDistance) +  " kilometros.", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -297,7 +332,6 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         var currentLatitude = location.latitude
         var currentLongitude = location.longitude
         val radius = 0.03 // 30 metros de distancia
-        val earthRadiusKm = 6371
 
         val dLat = toRadians(currentLatitude - lastLatitude)
         val dLon = toRadians(currentLongitude - lastLongitude)
