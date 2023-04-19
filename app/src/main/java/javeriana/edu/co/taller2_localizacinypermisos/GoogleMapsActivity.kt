@@ -1,6 +1,7 @@
 package javeriana.edu.co.taller2_localizacinypermisos
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.hardware.Sensor
@@ -9,11 +10,14 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -83,19 +87,19 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
         permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
 
-            isReadPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: isReadPermissionGranted
-            isWritePermissionGranted = permissions[android.Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: isWritePermissionGranted
+            //isReadPermissionGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: isReadPermissionGranted
+            //isWritePermissionGranted = permissions[android.Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: isWritePermissionGranted
             isLocationPermissionGranted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] ?: isLocationPermissionGranted
 
-            Log.i("Taller 2", "Read initial permission: $isReadPermissionGranted")
-            Log.i("Taller 2", "Write initial permission: $isWritePermissionGranted")
+            //Log.i("Taller 2", "Read initial permission: $isReadPermissionGranted")
+            //Log.i("Taller 2", "Write initial permission: $isWritePermissionGranted")
             Log.i("Taller 2", "Location initial permission: $isLocationPermissionGranted")
         }
 
         requestPermissions()
 
-        Log.i("Taller 2", "Read permission: $isReadPermissionGranted")
-        Log.i("Taller 2", "Write permission: $isWritePermissionGranted")
+        //Log.i("Taller 2", "Read permission: $isReadPermissionGranted")
+        //Log.i("Taller 2", "Write permission: $isWritePermissionGranted")
         Log.i("Taller 2", "Location permission: $isLocationPermissionGranted")
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -170,13 +174,13 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
     private fun requestPermissions()
     {
-        isReadPermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-        isWritePermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        //isReadPermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        //isWritePermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         isLocationPermissionGranted = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
         val permissionRequest : MutableList<String> = ArrayList()
 
-
+/*
         if (!isReadPermissionGranted)
         {
             permissionRequest.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -186,6 +190,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         {
             permissionRequest.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
+        */
 
         if (!isLocationPermissionGranted)
         {
@@ -219,6 +224,20 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     private fun setUpMap()
     {
         // Verificar permisos
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+            val builder = AlertDialog.Builder(this)
+            builder.setMessage("El GPS está apagado, ¿desea encenderlo?").setCancelable(false).setPositiveButton("Sí") { _, _ ->
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+                .setNegativeButton("No") { dialog, _ ->
+                    dialog.cancel()
+                }
+            val alert = builder.create()
+            alert.show()
+        }
+
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_REQUEST_CODE)
