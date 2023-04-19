@@ -233,6 +233,11 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLong, 12f))
             }
 
+
+            mMap.setOnMapLongClickListener {
+                mMap.addMarker(MarkerOptions().position(it).title("Marcador LongClick"))
+            }
+
             startLocationUpdates()
         }
     }
