@@ -100,6 +100,36 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        bindingGoogleMaps.buscarDireccion.setOnClickListener {
+            val direccionABuscar = bindingGoogleMaps.mapText.text
+
+
+            if (direccionABuscar.isNotEmpty())
+            {
+                try {
+                    val direccionesGeocoder = Geocoder(this).getFromLocationName(direccionABuscar.toString(), 5)
+
+                    if (direccionesGeocoder!!.size > 0)
+                    {
+                        val address = direccionesGeocoder[0]
+                        val markerLatitude = address.latitude
+                        val markerLongitude = address.longitude
+
+                        val puntoAColocar = LatLng(markerLatitude, markerLongitude)
+                        mMap.addMarker(MarkerOptions().position(puntoAColocar).title(direccionABuscar.toString()))
+                    }
+                    else
+                    {
+                        Toast.makeText(baseContext, "Direccion no encontrada...", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                catch (e: Exception)
+                {
+                    Toast.makeText(applicationContext, "Error: " + e.message, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
 
         locationCallback = object : LocationCallback()
         {
