@@ -31,7 +31,7 @@ import com.google.gson.GsonBuilder
 import javeriana.edu.co.taller2_localizacinypermisos.databinding.ActivityGoogleMapsBinding
 import java.io.File
 import java.lang.Math.toRadians
-import java.time.LocalDateTime
+import java.util.Date
 import kotlin.math.*
 
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener, SensorEventListener
@@ -41,7 +41,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     var sensor : Sensor? = null
 
     // Para escribir en la ubicacion
-    data class Ubicacion(val latitud: Double, val longitud: Double, val fechaHora: LocalDateTime)
+    data class Ubicacion(val latitud: Double, val longitud: Double, val fechaHora: String)
 
     // Binding
     private lateinit var bindingGoogleMaps : ActivityGoogleMapsBinding
@@ -243,7 +243,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         locationRequest.interval = 5000
         locationRequest.fastestInterval = 3000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        
+
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
@@ -340,7 +340,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         }
 
         // Crear nueva instancia de Ubicacion y agregar a la lista anterior
-        val nuevaUbicacion = Ubicacion(latitud, longitud, LocalDateTime.now())
+        val nuevaUbicacion = Ubicacion(latitud, longitud, Date(System.currentTimeMillis()).toString())
         val ubicacionesNuevas = ubicacionesAnteriores + nuevaUbicacion
 
         // Serializar lista de ubicaciones y escribir en el archivo
