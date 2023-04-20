@@ -39,11 +39,12 @@ import java.text.DecimalFormat
 import java.util.Date
 import kotlin.math.*
 
+
 class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener, SensorEventListener
 {
     // Sensors
-    var sensorManager : SensorManager? = null
-    var sensor : Sensor? = null
+    private var sensorManager : SensorManager? = null
+    private var sensor : Sensor? = null
 
     // Para escribir en la ubicacion
     data class Ubicacion(val latitud: Double, val longitud: Double, val fechaHora: String)
@@ -53,8 +54,8 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
     // mMap
     private lateinit var mMap: GoogleMap
-    var lastMarkerLatitude : Double = 0.0
-    var lastMarkerLongitude : Double = 0.0
+    private var lastMarkerLatitude : Double = 0.0
+    private var lastMarkerLongitude : Double = 0.0
 
     // Location
     private lateinit var lastLocation: Location
@@ -62,15 +63,12 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
     private lateinit var locationCallback: LocationCallback
     var lastLatitude = 0.0
     var lastLongitude  = 0.0
-    private lateinit var geocoder: Geocoder
 
     // Permission Launcher
     private lateinit var permissionLauncher : ActivityResultLauncher<Array<String>>
-    private var isReadPermissionGranted = false
-    private var isWritePermissionGranted = false
     private var isLocationPermissionGranted = false
 
-    val earthRadiusKm = 6371
+    private val earthRadiusKm = 6371
 
     companion object
     {
@@ -116,11 +114,11 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             if (direccionABuscar.isNotEmpty())
             {
                 try {
-                    val direccionesGeocoder = Geocoder(this).getFromLocationName(direccionABuscar.toString(), 5)
+                    val directionsGeocoder = Geocoder(this).getFromLocationName(direccionABuscar.toString(), 5)
 
-                    if (direccionesGeocoder!!.size > 0)
+                    if (directionsGeocoder!!.size > 0)
                     {
-                        val address = direccionesGeocoder[0]
+                        val address = directionsGeocoder[0]
                         val nombreAddress = address.getAddressLine(0)
                         val markerLatitude = address.latitude
                         val markerLongitude = address.longitude
@@ -144,6 +142,9 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             }
         }
 
+        bindingGoogleMaps.locationHistoryButton.setOnClickListener {
+            //leerJSONYHacerRutas()
+        }
 
         locationCallback = object : LocationCallback()
         {
@@ -162,7 +163,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
                     mMap.addMarker(it)
                     calculateDistance(location, lastLatitude, lastLongitude) }
 
-                // Real time zoom
+                // Zoom en tiempo real
                 /*
                 latLng?.let { CameraUpdateFactory.newLatLngZoom(it, 15f) }
                     ?.let { googleMap.moveCamera(it) }
@@ -170,6 +171,49 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             }
         }
     }
+
+    /*
+    private fun readJSONAndDrawRoutes() {
+        val filename = "locations.json"
+        val file = File(getExternalFilesDir(null), filename)
+        try {
+            var json: JSONArray? = null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                json =
+                    JSONObject(String(Files.readAllBytes(file.toPath()))).getJSONArray("locations")
+            }
+            var startPoint: GeoPoint? = glocation
+            for (i in 0 until json!!.length()) {
+                val location = json.getJSONObject(i)
+                val latitude = location.getDouble("latitude")
+                val longitude = location.getDouble("longitude")
+                val endPoint = GeoPoint(latitude, longitude)
+                drawRouteJSON(startPoint, endPoint)
+                startPoint = endPoint
+            }
+        } catch (e: java.lang.Exception) {
+            // Manejar el error
+        }
+    }
+
+     */
+
+    /*
+    private fun leerJSONYHacerRutas()
+    {
+        val nombreArchivo = "locations.json"
+        val archivo = File(getExternalFilesDir(null), nombreArchivo)
+        if (!archivo.exists())
+        {
+            Toast.makeText(baseContext, "Taller 2", Toast.LENGTH_SHORT).show()
+        }
+        else
+        {
+            val startPoint
+        }
+    }
+
+     */
 
 
     private fun requestPermissions()
@@ -282,12 +326,12 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
             val longClickLatitude = longClickLatLng.latitude
             val longClickLongitude = longClickLatLng.longitude
 
-            val dLat = Math.toRadians(lastMarkerLatitude - longClickLatitude)
-            val dLon = Math.toRadians(lastLongitude - longClickLongitude)
+            val dLat = toRadians(lastMarkerLatitude - longClickLatitude)
+            val dLon = toRadians(lastLongitude - longClickLongitude)
 
-            val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(longClickLatitude)) * Math.cos(Math.toRadians(lastMarkerLatitude)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+            val a = sin(dLat / 2) * sin(dLat / 2) + cos(toRadians(longClickLatitude)) * cos(toRadians(lastMarkerLatitude)) * sin(dLon / 2) * sin(dLon / 2)
 
-            val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+            val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
             val totalDistance = earthRadiusKm * c
             val conversionDecimal = DecimalFormat("#.##")
@@ -375,7 +419,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
         this@GoogleMapsActivity.lastLongitude = currentLongitude
     }
 
-    fun agregarUbicacion(latitud: Double, longitud: Double)
+    private fun agregarUbicacion(latitud: Double, longitud: Double)
     {
         // Crear objeto Gson para serializar/deserializar objetos JSON
         val gson: Gson = GsonBuilder().setPrettyPrinting().create()
@@ -418,7 +462,7 @@ class GoogleMapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.On
 
     override fun onSensorChanged(event: SensorEvent?)
     {
-        var googleMap = mMap
+        val googleMap = mMap
 
         if (event != null)
         {
